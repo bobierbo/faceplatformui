@@ -67,6 +67,7 @@ public class FaceDetectActivity extends Activity implements
     protected SurfaceHolder mSurfaceHolder;
     protected ImageView mCloseView;
     protected ImageView mSoundView;
+    protected ImageView mSwitchView;
     protected ImageView mSuccessView;
     protected TextView mTipsTopView;
     protected TextView mTipsBottomView;
@@ -96,6 +97,7 @@ public class FaceDetectActivity extends Activity implements
     protected int mPreviewDegree;
     // 监听系统音量广播
     protected BroadcastReceiver mVolumeReceiver;
+    private int cameraIndex = 1;//摄像头选择，默认前置摄像头
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -144,6 +146,7 @@ public class FaceDetectActivity extends Activity implements
         mFaceDetectRoundView = (FaceDetectRoundView) mRootView.findViewById(R.id.detect_face_round);
         mCloseView = (ImageView) mRootView.findViewById(R.id.detect_close);
         mSoundView = (ImageView) mRootView.findViewById(R.id.detect_sound);
+        mSwitchView = (ImageView) mRootView.findViewById(R.id.liveness_switch);
         mSoundView.setImageResource(mIsEnableSound ?
                 R.mipmap.ic_enable_sound_ext : R.mipmap.ic_disable_sound_ext);
         mSoundView.setOnClickListener(new View.OnClickListener() {
@@ -155,6 +158,18 @@ public class FaceDetectActivity extends Activity implements
                 if (mIDetectStrategy != null) {
                     mIDetectStrategy.setDetectStrategySoundEnable(mIsEnableSound);
                 }
+            }
+        });
+        mSwitchView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(cameraIndex == 0) {
+                    cameraIndex = 1;
+                } else {
+                    cameraIndex = 0;
+                }
+                stopPreview();
+                startPreview();
             }
         });
         mTipsTopView = (TextView) mRootView.findViewById(R.id.detect_top_tips);
@@ -218,7 +233,7 @@ public class FaceDetectActivity extends Activity implements
         }
     }
 
-    private Camera open() {
+    private Camera open(int cameraIndex) {
         Camera camera;
         int numCameras = Camera.getNumberOfCameras();
         if (numCameras == 0) {
@@ -226,13 +241,24 @@ public class FaceDetectActivity extends Activity implements
         }
 
         int index = 0;
-        while (index < numCameras) {
-            Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-            Camera.getCameraInfo(index, cameraInfo);
-            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                break;
+        if(cameraIndex == 0) {
+            while (index < numCameras) {
+                Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+                Camera.getCameraInfo(index, cameraInfo);
+                if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                    break;
+                }
+                index++;
             }
-            index++;
+        } else {
+            while (index < numCameras) {
+                Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+                Camera.getCameraInfo(index, cameraInfo);
+                if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                    break;
+                }
+                index++;
+            }
         }
 
         if (index < numCameras) {
@@ -251,29 +277,35 @@ public class FaceDetectActivity extends Activity implements
             mSurfaceHolder.addCallback(this);
         }
 
-        if (mCamera == null) {
-            try {
-                mCamera = open();
-            } catch (RuntimeException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            mCamera = open(cameraIndex);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         if (mCamera == null) {
             return;
         }
-        if (mCameraParam == null) {
-            mCameraParam = mCamera.getParameters();
-        }
+        mCameraParam = mCamera.getParameters();
 
         mCameraParam.setPictureFormat(PixelFormat.JPEG);
         int degree = displayOrientation(this);
         mCamera.setDisplayOrientation(degree);
         // 设置后无效，camera.setDisplayOrientation方法有效
         mCameraParam.set("rotation", degree);
-        mPreviewDegree = degree;
+
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        Camera.getCameraInfo(mCameraId, cameraInfo);
+
+        if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+            // 后置摄像头有问题，需要把预览的图像数据再颠倒一次。也就是加180度
+            mPreviewDegree = degree + 180;
+        } else {
+            mPreviewDegree = degree;
+        }
+
         if (mIDetectStrategy != null) {
             mIDetectStrategy.setPreviewDegree(degree);
         }
