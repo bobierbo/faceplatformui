@@ -54,8 +54,7 @@ public class FaceLivenessActivity extends Activity implements
         SurfaceHolder.Callback,
         Camera.PreviewCallback,
         Camera.ErrorCallback,
-        VolumeUtils.VolumeCallback,
-        ILivenessStrategyCallback {
+        VolumeUtils.VolumeCallback, ILivenessStrategyCallback {
 
     public static final String TAG = FaceLivenessActivity.class.getSimpleName();
 
@@ -283,7 +282,7 @@ public class FaceLivenessActivity extends Activity implements
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        
         if (mCamera == null) {
             return;
         }

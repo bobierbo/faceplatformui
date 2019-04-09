@@ -54,8 +54,7 @@ public class FaceDetectActivity extends Activity implements
         SurfaceHolder.Callback,
         Camera.PreviewCallback,
         Camera.ErrorCallback,
-        VolumeUtils.VolumeCallback,
-        IDetectStrategyCallback {
+        VolumeUtils.VolumeCallback, IDetectStrategyCallback {
 
     public static final String TAG = FaceDetectActivity.class.getSimpleName();
     public static final String DETECT_CONFIG = "FaceOptions";
@@ -305,7 +304,7 @@ public class FaceDetectActivity extends Activity implements
         } else {
             mPreviewDegree = degree;
         }
-
+        
         if (mIDetectStrategy != null) {
             mIDetectStrategy.setPreviewDegree(degree);
         }

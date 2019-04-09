@@ -4,6 +4,6 @@
       tools:context="com.baidu.faceplatform_ui.MainActivity">
     <item android:id="@+id/action_settings"
           android:orderInCategory="100"
-          android:title="@string/action_settings"
+          android:title="@string/app_name"
           app:showAsAction="never"/>
 </menu>

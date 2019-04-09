@@ -89,7 +89,7 @@
         android:id="@+id/liveness_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/liveness_sound"
+        android:layout_toLeftOf="@+id/detect_sound"
         android:layout_margin="20dp"
         android:src="@mipmap/switch_camera" />
     
@@ -110,6 +110,6 @@
             android:id="@+id/detect_result_image_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"></LinearLayout>
+            android:orientation="horizontal"/>
     </HorizontalScrollView>
 </RelativeLayout>
